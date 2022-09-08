@@ -21,6 +21,9 @@ const (
 // See https://cloud.google.com/storage/docs/using-encryption-keys#generating_your_own_encryption_key
 var encryptionKey = "yRyCOikXi1ZDNE0xN3yiFsJjg7LGimoLrGFcLZgQoVk="
 
+// var keyRingName = "gcs-backend-acceptance-tests"
+// var keyRingLocation = "???"
+
 func TestStateFile(t *testing.T) {
 	t.Parallel()
 
@@ -165,7 +168,38 @@ func TestBackendWithEncryption(t *testing.T) {
 	backend.TestBackendStateLocks(t, be0, be1)
 }
 
+// func TestBackendWithKMS(t *testing.T) {
+// 	t.Parallel()
+
+// 	bucket := bucketName(t)
+// 	keyName := keyName(t)
+// 	projectID := os.Getenv("GOOGLE_PROJECT")
+
+// 	kmsDetails := map[string]string{
+// 		"project":  projectID,
+// 		"location": keyRingLocation,
+// 		"key_ring": keyRingName,
+// 		"key":      keyName,
+// 	}
+// 	// kmsName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
+// 	// 	kmsDetails["project"],
+// 	// 	kmsDetails["location"],
+// 	// 	kmsDetails["key_ring"],
+// 	// 	kmsDetails["key"],
+// 	// )
+
+// 	setupKey(t, kmsDetails)
+// 	be0 := setupBackend(t, bucket, noPrefix, noEncryptionKey, kmsDetails)
+// 	defer teardownBackend(t, be0, noPrefix)
+
+// 	be1 := setupBackend(t, bucket, noPrefix, noEncryptionKey, kmsDetails)
+
+// 	backend.TestBackendStates(t, be0)
+// 	backend.TestBackendStateLocks(t, be0, be1)
+// }
+
 // setupBackend returns a new GCS backend.
+// func setupBackend(t *testing.T, bucket, prefix, key string, kmsDetails map[string]interface{}) backend.Backend {
 func setupBackend(t *testing.T, bucket, prefix, key string) backend.Backend {
 	t.Helper()
 
@@ -180,6 +214,7 @@ func setupBackend(t *testing.T, bucket, prefix, key string) backend.Backend {
 		"bucket":         bucket,
 		"prefix":         prefix,
 		"encryption_key": key,
+		// "kms_key":        kmsDetails,
 	}
 
 	b := backend.TestBackendConfig(t, New(), backend.TestWrapConfig(config))
@@ -204,6 +239,11 @@ func setupBackend(t *testing.T, bucket, prefix, key string) backend.Backend {
 
 	return b
 }
+
+// // setupKey creates a new KMS Key in an existing KMS Keyring.
+// func setupKey(t *testing.T, keyDetails map[string]string) {
+// 	// Create key using details
+// }
 
 // teardownBackend deletes all states from be except the default state.
 func teardownBackend(t *testing.T, be backend.Backend, prefix string) {
@@ -231,6 +271,41 @@ func teardownBackend(t *testing.T, be backend.Backend, prefix string) {
 	}
 }
 
+// // teardownKmsKeys disables the Cloud KMS Key used for testing
+// func teardownKmsKeys(t *testing.T, keyLocaton, keyRing, keyName string) {
+// 	t.Helper()
+
+// 	// No existing KMS Client in backend.Backend in test
+// 	ctx := context.TODO()
+// 	c, err := kms.NewKeyManagementClient(ctx)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	defer c.Close()
+
+// 	// Iterate through Keys in Key Chain and delete
+// 	// Note: Key Chains cannot be deleted from projects, only emptied
+
+// 	req := &kmspb.ListCryptoKeysRequest{
+// 		// TODO: Fill request struct fields.
+// 		// See https://pkg.go.dev/google.golang.org/genproto/googleapis/cloud/kms/v1#ListCryptoKeysRequest.
+// 	}
+// 	it := c.ListCryptoKeys(ctx, req)
+// 	for {
+// 		resp, err := it.Next()
+// 		if err == iterator.Done {
+// 			break
+// 		}
+// 		if err != nil {
+// 			t.Errorf("error iterating through keys in %s keyring: %v", keyRingName, err)
+// 		}
+// 		// TODO: Use resp.
+// 		_ = resp
+// 	}
+
+// 	projectID := os.Getenv("GOOGLE_PROJECT")
+// }
+
 // bucketName returns a valid bucket name for this test.
 func bucketName(t *testing.T) string {
 	name := fmt.Sprintf("tf-%x-%s", time.Now().UnixNano(), t.Name())
@@ -242,3 +317,20 @@ func bucketName(t *testing.T) string {
 
 	return strings.ToLower(name)
 }
+
+// // keyName returns a valid key name for this test.
+// func keyName(t *testing.T) string {
+// 	name := fmt.Sprintf("tf-key-%x-%s", time.Now().UnixNano(), t.Name())
+
+// 	// Key names must match regex : [a-zA-Z0-9_-]{1,63}
+// 	if len(name) > 63 {
+// 		name = name[:63]
+// 	}
+// 	re := regexp.MustCompile("[a-zA-Z0-9_-]{1,63}")
+// 	ok := re.Match([]byte(name))
+// 	if !ok {
+// 		t.Errorf("cannot use invalid key name: %s", name)
+// 	}
+
+// 	return strings.ToLower(name)
+// }
