@@ -31,6 +31,7 @@ type Backend struct {
 	prefix     string
 
 	encryptionKey []byte
+	kmsKeyName    string
 }
 
 func New() backend.Backend {
@@ -87,6 +88,38 @@ func New() backend.Backend {
 				Optional:    true,
 				Description: "A 32 byte base64 encoded 'customer supplied encryption key' used to encrypt all state.",
 				Default:     "",
+			},
+			// Need to make this mutally exclusive with `encryption_key`
+			"kms_encryption_key": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: `A Cloud KMS key used by default when state files are written to the backend bucket.`,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"project": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The project containing the Cloud KMS resources`,
+						},
+						"location": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The location of the Cloud KMS resources. If left unspecified the value defaults to global`,
+							Default:     "global",
+						},
+						"key_ring": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `Name of a Cloud KMS key ring within the specified location (if location is unspecified then the key ring must be a global resource).`,
+						},
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `Name of a Cloud KMS key.`,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -210,6 +243,26 @@ func (b *Backend) configure(ctx context.Context) error {
 			return fmt.Errorf("Error decoding encryption key: %s", err)
 		}
 		b.encryptionKey = k
+	}
+
+	// Cannot combine this with customer-supplied key
+	// TODO(SarahFrench) - add protections against the above
+	kmsConfig, kmsOk := data.GetOk("kms_encryption_key")
+	if kmsOk {
+		kmsList := kmsConfig.([]interface{}) // List with MaxItems:1
+		kms := kmsList[0].(map[string]interface{})
+		kmsProject := kms["project"].(string)
+		kmsLocation := kms["location"].(string)
+		kmsKeyRing := kms["key_ring"].(string)
+		kmsKey := kms["key"].(string)
+		kmsName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
+			kmsProject,
+			kmsLocation,
+			kmsKeyRing,
+			kmsKey,
+		)
+
+		b.kmsKeyName = kmsName
 	}
 
 	return nil
