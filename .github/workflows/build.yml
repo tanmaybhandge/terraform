@@ -605,9 +605,9 @@ jobs:
         if: ${{ steps.metadata.outputs.run-equivalence-tests == 'true' }}
         run: |
           unzip "./terraform_${{ env.version }}_${{ env.os }}_${{ env.arch }}.zip"
-          TERRAFORM_BINARY_PATH="$(pwd)/dist/terraform"
+          TERRAFORM_BINARY_PATH="$(pwd)/terraform"
           
-          tree terraform
+          ls -altR terraform
           
           pushd tools/equivalence-tests
           
