@@ -549,7 +549,6 @@ jobs:
 
   equivalence-test:
     name: "Run equivalence tests"
-    if: ${{ github.event.push.ref =~ 'refs/tags' }}
     runs-on: ubuntu-latest
     needs:
       - get-product-version
@@ -571,7 +570,7 @@ jobs:
           if [[ "${{ github.event.push.ref }}" =~ "refs/tags" ]]; then
             echo "::set-output name=run-equivalence-tests::true"
           else
-            echo "::set-output name=run-equivalence-tests::false"
+            echo "::set-output name=run-equivalence-tests::true"
           fi
           
           if [[ "${{ env.prerelease }}" == *"alpha"* ]]; then
