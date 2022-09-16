@@ -15,7 +15,7 @@
               "constant_value": "my_integer"
             },
             "integer": {
-              "constant_value": 2
+              "constant_value": 1
             }
           },
           "mode": "managed",
@@ -43,7 +43,7 @@
             "bool": null,
             "float": null,
             "id": "my_integer",
-            "integer": 2,
+            "integer": 1,
             "number": null,
             "string": null
           }
@@ -62,7 +62,7 @@
           "bool": null,
           "float": null,
           "id": "my_integer",
-          "integer": 2,
+          "integer": 1,
           "number": null,
           "string": null
         },
