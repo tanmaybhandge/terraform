@@ -582,7 +582,7 @@ jobs:
           fi
 
       - name: "Install Go toolchain"
-        if: ${{ steps.metadata.outputs.run-equivalence-tests == "true" }}
+        if: ${{ steps.metadata.outputs.run-equivalence-tests == 'true' }}
         uses: actions/setup-go@v2
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
@@ -595,14 +595,14 @@ jobs:
           # token: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
 
       - name: "Download Terraform binary"
-        if: ${{ steps.metadata.outputs.run-equivalence-tests == "true" }}
+        if: ${{ steps.metadata.outputs.run-equivalence-tests == 'true' }}
         uses: actions/download-artifact@v2
         with:
           name: terraform_${{ env.version }}_${{ env.os }}_${{ env.arch }}.zip
           path: .
 
       - name: "Run and update equivalence tests"
-        if: ${{ steps.metadata.outputs.run-equivalence-tests == "true" }}
+        if: ${{ steps.metadata.outputs.run-equivalence-tests == 'true' }}
         run: |
           unzip "./terraform_${{ env.version }}_${{ env.os }}_${{ env.arch }}.zip"
           TERRAFORM_BINARY_PATH="$(pwd)/dist/terraform"
