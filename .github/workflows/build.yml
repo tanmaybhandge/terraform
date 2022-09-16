@@ -549,7 +549,7 @@ jobs:
 
   equivalence-test:
     name: "Run equivalence tests"
-    if: "${{ github.event.push.ref }}" =~ "refs/tags"
+    if: ${{ github.event.push.ref == *"refs/tags"* }}
     runs-on: ubuntu-latest
     needs:
       - get-product-version
