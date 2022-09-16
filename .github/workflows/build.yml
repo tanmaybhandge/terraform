@@ -607,9 +607,9 @@ jobs:
           unzip "./terraform_${{ env.version }}_${{ env.os }}_${{ env.arch }}.zip"
           TERRAFORM_BINARY_PATH="$(pwd)/dist/terraform"
           
-          ls
+          tree terraform
           
-          pushd tools/equivalence_tests
+          pushd tools/equivalence-tests
           
           go run main.go -tests=testing -goldens=goldens -binary="$TERRAFORM_BINARY_PATH" -update
           
