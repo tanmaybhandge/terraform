@@ -614,6 +614,10 @@ jobs:
           changed=$(git diff --quiet -- goldens || echo true)
           if [[ $changed == "true" ]]; then
             echo "found changes, and pushing new golden files into branch ${{ steps.metadata.outputs.target-branch }}."
+          
+            git config user.email "52939924+teamterraform@users.noreply.github.com"
+            git config user.name "The Terraform Team"
+          
             git add ./goldens
             git commit -m"Automatically updated equivalence test golden files after release ${{ env.version }}."
             git push
