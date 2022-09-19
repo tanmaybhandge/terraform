@@ -246,7 +246,7 @@ func TestApplyJSON_outputs(t *testing.T) {
 				},
 				"password": map[string]interface{}{
 					"sensitive": true,
-					"value":     "horse-battery",
+					"value":     "(sensitive value)",
 					"type":      "string",
 				},
 			},

@@ -123,6 +123,23 @@ func (v *JSONView) Outputs(outputs json.Outputs) {
 	v.log.Info(
 		outputs.String(),
 		"type", json.MessageOutputs,
-		"outputs", outputs,
+		"outputs", redactOutputs(outputs),
 	)
+}
+
+func redactOutputs(outputs json.Outputs) json.Outputs {
+	redactedOutputs := make(json.Outputs, len(outputs))
+	for key, value := range outputs {
+		redactedValue := value.Value
+		if value.Sensitive && value.Value != nil {
+			redactedValue = encJson.RawMessage(`"(sensitive value)"`)
+		}
+		redactedOutputs[key] = json.Output{
+			Sensitive: value.Sensitive,
+			Type:      value.Type,
+			Value:     redactedValue,
+			Action:    value.Action,
+		}
+	}
+	return redactedOutputs
 }
