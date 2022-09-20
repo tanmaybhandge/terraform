@@ -13,7 +13,7 @@ import (
 // This version describes the schema of JSON UI messages. This version must be
 // updated after making any changes to this view, the jsonHook, or any of the
 // command/views/json package.
-const JSON_UI_VERSION = "1.0"
+const JSON_UI_VERSION = "1.1"
 
 func NewJSONView(view *View) *JSONView {
 	log := hclog.New(&hclog.LoggerOptions{
@@ -123,23 +123,6 @@ func (v *JSONView) Outputs(outputs json.Outputs) {
 	v.log.Info(
 		outputs.String(),
 		"type", json.MessageOutputs,
-		"outputs", redactOutputs(outputs),
+		"outputs", outputs,
 	)
-}
-
-func redactOutputs(outputs json.Outputs) json.Outputs {
-	redactedOutputs := make(json.Outputs, len(outputs))
-	for key, value := range outputs {
-		redactedValue := value.Value
-		if value.Sensitive && value.Value != nil {
-			redactedValue = encJson.RawMessage(`"(sensitive value)"`)
-		}
-		redactedOutputs[key] = json.Output{
-			Sensitive: value.Sensitive,
-			Type:      value.Type,
-			Value:     redactedValue,
-			Action:    value.Action,
-		}
-	}
-	return redactedOutputs
 }

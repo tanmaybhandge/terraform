@@ -282,7 +282,7 @@ func TestJSONView_Outputs(t *testing.T) {
 				},
 				"password": map[string]interface{}{
 					"sensitive": true,
-					"value":     "(sensitive value)",
+					"value":     "horse-battery",
 					"type":      "string",
 				},
 			},
